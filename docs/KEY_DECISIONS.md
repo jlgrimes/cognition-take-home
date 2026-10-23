@@ -43,7 +43,7 @@ access reviews; they still scope their own config). So I built the platform laye
   doesn't prove production hardening is cheap too. My claim is narrower: **code isn't the expensive part.** The expensive
   part is the build-only rows in `MOCKED.md`, and the people who keep them running and explain them to an auditor.
 - Owning the platform is roughly 1–2 engineers plus security/compliance time: about $300–750K/yr at normal loaded salaries
-  (`RECOMMENDATION.md` §4), i.e. more than the $250K license, and the license itself is probably reducible. The risk
+  (`RECOMMENDATION.md` §4), i.e. more than the license plus the admin time Power Apps still needs (~$300–375K), and the license itself is probably reducible. The risk
   isn't that code gets refund maths wrong (that's custom code in both options); it's that a missed deprovisioning or a
   four-eyes bug is a control failure nobody owns.
 - Where Power Apps is weak (refunds via Stripe, flags via LaunchDarkly), the client needs custom code either way. Devin fits

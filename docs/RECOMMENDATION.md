@@ -2,7 +2,7 @@
 
 **For:** VP of Engineering. **Status:** draft, pending answers to [open questions 2–7](research/power-apps.md#6-questions-for-the-client-before-recommending).
 
-Keep Power Apps for the KYC queue and the queue-and-approval apps that follow it. Use Devin for the code Power Apps does badly: the Stripe refund backend, the flag-service connector, and new apps written as Power Apps code apps. Building your own platform is technically easy (Devin built a working prototype of one in about two hours), but it turns a license into a team you staff permanently. The $250K/yr license costs about the same as one senior engineer. Owning the platform takes at least that one engineer, plus security time, hosting and Devin usage.
+Keep Power Apps for the KYC queue and the queue-and-approval apps that follow it. Use Devin for the code Power Apps does badly: the Stripe refund backend, the flag-service connector, and new apps written as Power Apps code apps. Building your own platform is technically easy (Devin built a working prototype of one in about two hours), but it turns a license into a team you staff permanently. The $250K/yr license costs about the same as one senior engineer. Owning the platform takes at least that one engineer, plus security time, hosting and Devin usage. Keeping Power Apps isn't fire-and-forget either: it needs part of an admin's time and engineers for the custom code (§2, §4 A6), so the real comparison is about $300–375K/yr against $300K+.
 
 Notation: **[inference]** = my read, not confirmed with you. **[assumption]** = a number I picked so the model can be calculated. Replace it with yours.
 
@@ -31,7 +31,10 @@ These are financial tools, so "who keeps it running" and "who makes sure the num
 | Access reviews, audit evidence | Built-in reports. Compliance pulls them | You build the reports and keep them working (rows 4, 7, 17) |
 | Changes forced on you | Microsoft's two release waves a year, licensing and connector changes. You absorb them on Microsoft's schedule | Framework major versions. You absorb them on your schedule |
 | App logic changes | Power Fx and flows, edited by whoever knows Power Platform. Weak testing and review ([research §4](research/power-apps.md#4-where-power-apps-is-weak-and-where-engineers-feel-it)) | Code with tests, CI and review. Devin does most of the edits |
+| Platform admin / CoE | You: environments, DLP, security roles, licence assignment, Dataverse capacity, solution pipelines, cleaning up abandoned maker apps. ~0.25–0.5 FTE at 13 apps (A6) | Part of the platform team's job (rows 1–17) |
 | Integrations (Stripe, KYC vendor, flags) and reconciliation | Custom code | Custom code (same in both) |
+
+**App-level work isn't equal either.** Every option has to change business rules and screens, so §4 leaves that work out. But it costs more per change in Power Fx: there's weak testing and review, few engineers are fluent in it, and Devin is less effective there than in TypeScript. This is the best argument against plain Keep. It's an argument for Hybrid (new apps as code apps), not for replacing the platform.
 
 **Accuracy.** Errors can come from three places, and the two options are not equally risky in each:
 1. **Money movement** (amounts, partial refunds, idempotency, retries). This is custom code in *every* option, because the Stripe connector can't issue refunds (row 8). It stays accurate through tests and a daily reconciliation against Stripe. Code handles that better than Power Fx, and Power Apps adds nothing here.
@@ -64,7 +67,7 @@ Assumptions. Replace each with your own figure.
 - **A3** Security/compliance: 0.25–0.5 FTE, plus a $20–40K/yr pen test [assumption].
 - **A4** Hosting, DB, logging/SIEM: $10–30K/yr [assumption].
 - **A5** Devin: $20–50K/yr [placeholder]. Seats are cheap: a Teams full seat is $40/month, and flex seats are free and draw from shared on-demand credits ([Devin docs](https://docs.devin.ai/admin/billing/self-serve)). The real cost is usage. Enterprise plans (which add SSO and RBAC) bill usage in ACUs at contract prices, and those prices aren't public ([Devin docs](https://docs.devin.ai/desktop/accounts/usage)). Replace this with a quote based on expected session volume.
-- **A6** Power Platform admin work if you keep it: 0.1–0.25 FTE [assumption].
+- **A6** Power Platform admin/CoE work if you keep it: 0.25–0.5 FTE at ~13 apps [assumption]. Covers environments, DLP, roles, licences, solution pipelines and Microsoft's release-wave changes. Higher if nobody on staff knows Power Platform.
 - Excluded: app-level work (business rules, screens, connectors), because every option needs it. Devin lowers it in Build and Hybrid.
 
 | Annual, steady state | Build (already have a platform team) | Build (no platform team) | Keep | Hybrid |
@@ -73,11 +76,11 @@ Assumptions. Replace each with your own figure.
 | Platform ownership (A2) | $100–250K | $200–500K | — | — |
 | Security/compliance (A3) | $70–165K | $70–165K | (mostly inherited) | (mostly inherited) |
 | Hosting (A4) | $10–30K | $10–30K | — | — |
-| Admin (A6) | — | — | $20–60K | $20–60K |
+| Admin (A6) | — | — | $50–125K | $50–125K |
 | Devin (A5) | $20–50K | $20–50K | — | $20–50K |
-| **Total** | **~$200–495K** | **~$300–745K** | **~$270–310K** | **~$290–360K** |
+| **Total** | **~$200–495K** | **~$300–745K** | **~$300–375K** | **~$320–425K** |
 
-**Put simply: is the platform worth one engineer?** $250K/yr is about one fully loaded senior engineer (A1). So the license is the price of one engineer you never have to hire, manage or cover for. The cheapest realistic build is that one engineer owning the platform with Devin doing most of the upkeep. Add the security/compliance time, hosting and Devin from the table and you get ~$300–495K/yr, more than the license. One owner is also a single point of failure for controls over money and PII: vacations, departures and on-call all need a second person [judgment]. Devin is the small line in every column. It makes the engineer more productive, but it can't be the accountable owner.
+**Put simply: is the platform worth one engineer?** $250K/yr is about one fully loaded senior engineer (A1). So the license is the price of one engineer you never have to hire, manage or cover for. The cheapest realistic build is that one engineer owning the platform with Devin doing most of the upkeep. Add the security/compliance time, hosting and Devin from the table and you get ~$300–495K/yr. That's more than Keep (~$300–375K with admin time), but the ranges overlap at the low end. That's why the flip conditions in §5 matter more than the point estimates. One owner is also a single point of failure for controls over money and PII: vacations, departures and on-call all need a second person [judgment]. Devin is the small line in every column. It makes the engineer more productive, but it can't be the accountable owner.
 
 Year one of Build also includes the one-off production build (2–4 engineer-months of review and integration on top of Devin, ~$35–85K [assumption]) and paying the license while both systems run side by side.
 
