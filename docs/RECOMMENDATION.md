@@ -40,6 +40,8 @@ These are financial tools, so "who keeps it running" and "who makes sure the num
 
 So the risk of building isn't that code gets the sums wrong more often. It's that the controls around the money need a named team that owns them, and that team is the main cost in §4. If you can't name that team, don't build.
 
+**Policy and audit evidence are the client's job in both options.** Microsoft supplies the mechanisms and attests to its own infrastructure. The client still classifies PII, designs the access matrix, turns on auditing per table, runs access reviews and produces evidence. Devin can automate much of that checking and evidence work in either option, but can't own the controls ([audit-and-data-access.md](research/audit-and-data-access.md)).
+
 ## 3. The best case for building, and my answer to each point
 
 **"Power Apps is lock-in."** True for Power Fx, flows and the Dataverse schema. *Answer:* keep the lock-in thin rather than leaving. Put business logic in Devin-written connectors, Azure Functions and code apps, which is normal code that can be moved later. The governance layer (Entra) is probably your identity provider anyway [inference; open question 4], so you'd keep using it even if you built. Lock-in gets worse with every Power Fx app you build, so it should shape *how* you build apps 4–13, not whether you keep the platform.

@@ -11,6 +11,7 @@ Build-vs-buy evaluation: can a ~60-engineer fintech replace Microsoft Power Apps
 | [`docs/SPEC.md`](docs/SPEC.md) | The assignment |
 | [`docs/research/power-apps.md`](docs/research/power-apps.md) | How Power Apps maps to their three apps, pricing, limits, weak spots |
 | [`docs/research/internal-apps-explained.md`](docs/research/internal-apps-explained.md) | What a KYC queue, refunds dashboard and flag panel are, and what each needs from a stack |
+| [`docs/research/audit-and-data-access.md`](docs/research/audit-and-data-access.md) | The PII/data-access policy the client owns in either option, what Microsoft covers, and where Devin helps with audit |
 | [`docs/MOCKED.md`](docs/MOCKED.md) | Everything the prototype fakes, what production needs instead, and who owns it forever |
 | [`docs/NEW_APP_PLAYBOOK.md`](docs/NEW_APP_PLAYBOOK.md) | The instructions a Devin session follows to add app #N |
 | [`docs/KEY_DECISIONS.md`](docs/KEY_DECISIONS.md) | One-pager: scope, architecture, tradeoffs |
