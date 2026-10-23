@@ -1,7 +1,7 @@
 # What the prototype mocks, and what replacing Power Apps would actually require
 
 The prototype runs on a laptop with no external services. To get there, several things are faked.
-Every fake is tagged `// MOCK:` in the code (`grep -rn "MOCK:" prototype/src`) and points back here.
+Every fake is tagged `// MOCK:` in the code (`grep -rn "MOCK:" prototype/packages prototype/apps`) and points back here.
 
 This list is the real cost of "build it ourselves". Power Apps (with Entra ID, Dataverse, and the
 Power Platform admin center) gives the client most of these rows as a managed service today.

@@ -20,14 +20,24 @@ Build-vs-buy evaluation: can a ~60-engineer fintech replace Microsoft Power Apps
 
 A "mini Power Apps" built with Devin: one shared platform layer plus internal apps that plug into it.
 
-**Platform layer** (`prototype/src/platform/`), the things Power Apps gives you for free:
+It's an npm-workspaces monorepo:
+
+```
+prototype/
+  packages/platform   shared core: identity/RBAC, masking, audit, workflow engine, connectors, UI pieces
+  packages/kyc        KYC app: schema, roles, workflow rules, tests
+  packages/refunds    refunds app: schema, roles, workflow rules, Stripe service, tests
+  apps/console        Next.js host: sign-in, nav, pages; composes the app packages
+```
+
+**Platform layer** (`packages/platform`), the things Power Apps gives you for free:
 - **Identity + RBAC**: roles map to permissions; every page and action checks server-side. *(Sign-in is mocked.)*
 - **PII masking**: sensitive fields are masked before they reach the UI; revealing requires a permission and writes an audit entry.
 - **Append-only audit log**: every change records actor, reason and before/after; SQLite triggers reject UPDATE/DELETE.
 - **Workflow engine**: declarative state machines with permission checks, guards (four-eyes, maker-checker, limits), required reasons and optimistic locking. Blocked actions are shown with the reason, not hidden.
 - **Connector seam**: a `PaymentsConnector` interface with a mock Stripe that honours idempotency keys and refundable balance.
 
-**Apps** (`prototype/src/apps/`), each is a module registered in one line:
+**Apps** (`packages/<app>`), each exports an `AppModule` registered with one line in `apps/console/src/apps.ts`:
 - **KYC review queue**: claim (no double-claims), approve/reject/request info, escalate; high-risk cases must be escalated and the senior approver can't be the escalator.
 - **Refunds dashboard**: search charges, refund with reason codes, per-role limits ($100 support / $5,000 finance), larger refunds need a different approver, 14-day volume chart.
 - **Feature flags**: built by a separate Devin session from the playbook, as a test of how cheap app #N is.
@@ -42,7 +52,7 @@ npm install
 npm run dev          # http://localhost:3000
 ```
 
-The SQLite database (`prototype/data/app.db`) is created and seeded on first request. `npm run db:reset` wipes it.
+The SQLite database (`prototype/apps/console/data/app.db`) is created and seeded on first request. `npm run db:reset` wipes it.
 
 Pick a persona on the sign-in page:
 

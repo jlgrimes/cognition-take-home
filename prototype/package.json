@@ -2,32 +2,27 @@
   "name": "prototype",
   "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint",
+    "dev": "npm run dev -w @internal/console",
+    "build": "npm run build -w @internal/console",
+    "start": "npm run start -w @internal/console",
+    "lint": "eslint apps packages",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit",
-    "db:reset": "rm -f data/app.db data/app.db-*"
-  },
-  "dependencies": {
-    "better-sqlite3": "^12.11.1",
-    "next": "15.5.28",
-    "react": "19.1.0",
-    "react-dom": "19.1.0",
-    "zod": "^4.6.7"
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "db:reset": "npm run db:reset -w @internal/console"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@tailwindcss/postcss": "^4",
     "@types/better-sqlite3": "^9.6.0",
     "@types/node": "^24.19.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.5.28",
-    "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^3.2.7"
   }

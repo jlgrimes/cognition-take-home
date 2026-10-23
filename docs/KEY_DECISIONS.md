@@ -22,9 +22,9 @@ and Microsoft's patching and SOC attestations. So I built the platform layer fir
 ## Architecture choices
 - **One Next.js app, many modules** (`AppModule`: roles, migration, seed, pages). Thirteen apps in one deployable means one
   auth integration, one audit pipeline and one patch cycle instead of thirteen. Downside: shared blast radius and one
-  release train. At 13 apps the production shape is a monorepo (`packages/platform` + `apps/*`, separately deployable).
-  I kept it as folders because splitting into workspaces is plumbing that doesn't change what the prototype proves.
-  Note what that `packages/platform` is: an internal Power Platform that someone has to staff.
+  release train. Code is a monorepo: `packages/platform`, one `packages/<app>` per tool, and a Next.js host in `apps/console`,
+  so apps can later get their own hosts without touching the platform. Note what `packages/platform` is: an internal
+  Power Platform that someone has to staff.
 - **Rules live in the server-side workflow definitions, not the UI.** Guards return a human-readable reason, so the UI shows
   *why* an action is blocked, and tests cover the rules without a browser.
 - **Audit enforced in the database** (triggers block UPDATE/DELETE), not only in application code. It still isn't
