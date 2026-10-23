@@ -1,8 +1,8 @@
-# Recommendation: keep Power Apps, cut the bill, use Devin for the code
+# Recommendation: keep Power Apps, use Devin for the code
 
-**For:** VP of Engineering. **Status:** draft, pending the invoice breakdown and answers to the [open questions](research/power-apps.md#6-questions-for-the-client-before-recommending).
+**For:** VP of Engineering. **Status:** draft, pending answers to [open questions 2–7](research/power-apps.md#6-questions-for-the-client-before-recommending).
 
-Keep Power Apps for the KYC queue and the queue-and-approval apps that follow it. First get the $250K invoice broken down, because it looks too high for your size and right-sizing it probably saves more, at lower risk, than replacing it. Use Devin for the code Power Apps does badly: the Stripe refund backend, the flag-service connector, and new apps written as Power Apps code apps. Building your own platform is technically easy (Devin built a working prototype of one in about two hours), but it turns a license into a team you staff permanently. At your size that team costs about the same as the license, or more.
+Keep Power Apps for the KYC queue and the queue-and-approval apps that follow it. Use Devin for the code Power Apps does badly: the Stripe refund backend, the flag-service connector, and new apps written as Power Apps code apps. Building your own platform is technically easy (Devin built a working prototype of one in about two hours), but it turns a license into a team you staff permanently. At your size that team costs about the same as the $250K/yr license, or more.
 
 Notation: **[inference]** = my read, not confirmed with you. **[assumption]** = a number I picked so the model can be calculated. Replace it with yours.
 
@@ -10,7 +10,7 @@ Notation: **[inference]** = my read, not confirmed with you. **[assumption]** = 
 
 | | **Build with Devin** | **Keep Power Apps** | **Hybrid** (Power Apps + Devin-written code apps / connectors) |
 |---|---|---|---|
-| License / build cost | License goes away. One-off build of the platform layer ([MOCKED.md](MOCKED.md) rows 1–7, 11–17) plus Devin usage | ~$250K/yr today, probably reducible ([research §3](research/power-apps.md#3-cost-reality)). Apps 4–13 add ~$0 if the same people use them | Same license as Keep, plus Devin usage |
+| License / build cost | License goes away. One-off build of the platform layer ([MOCKED.md](MOCKED.md) rows 1–7, 11–17) plus Devin usage | $250K/yr. Apps 4–13 add ~$0 if the same people use them ([research §3](research/power-apps.md#3-cost-reality)) | Same license as Keep, plus Devin usage |
 | Ongoing maintenance & ownership | You own sign-in, roles, audit storage, hosting, DB, secrets, DLP, on-call and patching for good. ~1–2 engineers (§4) | Microsoft runs the platform. You own app logic, custom connectors, and the Power Platform admin work | Same as Keep, plus the code apps and connectors, which are normal code in Git |
 | Security & compliance | Every control is yours to build, test and evidence. The auditor talks to you, not to Microsoft's attestations | Inherits Entra/Conditional Access, Dataverse roles and field security, audit, DLP ([research §1](research/power-apps.md#1-the-parts-of-power-apps-that-matter-for-this-team)). You still scope your own configuration | Same as Keep. Code apps run inside Power Platform governance |
 | Speed to ship apps 4–13 | Slow until the platform is production-grade, then fast: app #N is one Devin session from the [playbook](NEW_APP_PLAYBOOK.md) plus review. App #3 (the flag panel) took a separate Devin session working only from the playbook about 5–6 minutes, including 14 tests, on the mocked platform | Fast for queue/approve/audit apps (model-driven + queues + approvals). Slow for integration-heavy apps. Depends on having someone fluent in Power Platform [inference] | Fast for both kinds: queue apps model-driven, custom ones as Devin-written code apps |
@@ -46,7 +46,7 @@ So the risk of building isn't that code gets the sums wrong more often. It's tha
 
 **"Dataverse and delegation limits will bite."** Non-delegable Power Fx queries silently return only the first 500–2,000 rows, which gives wrong answers on big tables ([research §4](research/power-apps.md#4-where-power-apps-is-weak-and-where-engineers-feel-it)). *Answer:* this is a canvas-app / Power Fx problem. Model-driven views and code apps query on the server [my understanding; verify on one real table]. Refund analytics belongs in your warehouse or BI tool anyway. *It depends on* whether apps 4–13 are queue workflows (fine) or large-table analytics (a real problem, and a reason to use code apps or BI for those apps, not to rebuild the platform).
 
-**"Per-user pricing grows with headcount."** True: Premium is $240/user/yr at list price, and a build's cost barely changes with user count. *Answer:* the break-even is a user count you can calculate. At the §4 assumptions, an owned platform costs ~$200K–$750K/yr, which equals ~830–3,100 Premium users at list price, before any EA discount or the $12 tier at 2,000+ seats. *It depends on* how many people actually use the apps today and in two years. The invoice tells us the first number.
+**"Per-user pricing grows with headcount."** True: Premium is $240/user/yr at list price, and a build's cost barely changes with user count. *Answer:* this only matters if growth pushes the license well above the cost of owning a platform, which is ~$200K–$750K/yr at the §4 assumptions, against $250K/yr today. Each extra 100 Premium users adds ~$24K/yr at list price. *It depends on* how fast the number of app users grows over the next two years.
 
 **"Refunds and flags already need custom code."** Very likely true. The Stripe connector can't issue refunds and there's no certified LaunchDarkly connector ([research §2](research/power-apps.md#2-mapping-their-three-apps-onto-power-apps), [MOCKED.md](MOCKED.md) row 8). *Answer:* this is code you write in every option, and it's where Devin fits best. It doesn't remove the need for the parts around it: sign-in, roles, approvals and audit. For the flag panel specifically, the flag vendor's own UI may make a custom app unnecessary in *any* option [inference].
 
@@ -67,23 +67,21 @@ Assumptions. Replace each with your own figure.
 
 | Annual, steady state | Build (already have a platform team) | Build (no platform team) | Keep | Hybrid |
 |---|---|---|---|---|
-| License | $0 | $0 | $250K today; right-sized unknown | same as Keep |
+| License | $0 | $0 | $250K | same as Keep |
 | Platform ownership (A2) | $100–250K | $200–500K | — | — |
 | Security/compliance (A3) | $70–165K | $70–165K | (mostly inherited) | (mostly inherited) |
 | Hosting (A4) | $10–30K | $10–30K | — | — |
 | Admin (A6) | — | — | $20–60K | $20–60K |
 | Devin (A5) | $20–50K | $20–50K | — | $20–50K |
-| **Total** | **~$200–495K** | **~$300–745K** | **~$270–310K today** | **~$290–360K today** |
+| **Total** | **~$200–495K** | **~$300–745K** | **~$270–310K** | **~$290–360K** |
 
 Year one of Build also includes the one-off production build (2–4 engineer-months of review and integration on top of Devin, ~$35–85K [assumption]) and paying the license while both systems run side by side.
-
-**The $250K looks too high.** It equals ~1,040 Premium seats at list price, which seems a lot for a company with ~60 engineers ([research §3](research/power-apps.md#3-cost-reality)). It probably bundles Dataverse capacity, Power Automate, Power BI, partner fees or an EA [inference]. **Ask for:** the invoice split by SKU and seat count; active users per app over the last 90 days (Power Platform admin center); Dataverse storage used vs. bought; Power Automate Process/bot licences; any Power BI or partner line items; and the EA renewal date and terms. If real usage is a few hundred users, the right-sized license could be well under $250K [inference], and every row above should be compared against *that* number.
 
 ## 5. What would flip this to "build"
 
 Build wins if **1 or 2** is true **and 3** is true. Items 4–6 each make building more attractive, but none of them is enough by itself:
 1. **You already run the platform.** All four items in the "auth and audit" answer in §3 exist and are staffed.
-2. **The right-sized license is still above the ownership cost.** That means real users above the break-even in §3 and growing, and Microsoft won't discount.
+2. **The license outgrows the ownership cost.** App users grow fast enough that the per-user license ends up well above the build cost in §4.
 3. **No one outside engineering edits the apps** ([open question 3](research/power-apps.md#6-questions-for-the-client-before-recommending)), so the citizen-developer value is zero.
 4. Apps 4–13 are mostly integration-heavy, not queue/approve/audit.
 5. You hit Dataverse or delegation limits on real data that code apps don't fix.
@@ -92,11 +90,10 @@ Build wins if **1 or 2** is true **and 3** is true. Items 4–6 each make buildi
 ## 6. Next steps
 
 **If you keep Power Apps (recommended):**
-1. Get the invoice breakdown and right-size before renewal: move per-app users to the right SKU, drop inactive seats, trim Dataverse capacity.
-2. Devin builds the refund backend properly: Stripe SDK, restricted key in a secrets manager, idempotency, webhooks, daily reconciliation (MOCKED row 8), exposed to Power Apps as a custom connector.
-3. Decide whether the flag panel should exist at all, or whether the vendor UI plus its audit log is enough. If it stays, Devin writes the connector.
-4. Pilot app #4 as a **code app** written by Devin. Measure time to ship and check that DLP, Entra and audit still apply. That number decides how apps 5–13 get built.
-5. Devin sets up ALM: solutions exported to Git, tests and pipelines, so Power Platform changes get code review.
+1. Devin builds the refund backend properly: Stripe SDK, restricted key in a secrets manager, idempotency, webhooks, daily reconciliation (MOCKED row 8), exposed to Power Apps as a custom connector.
+2. Decide whether the flag panel should exist at all, or whether the vendor UI plus its audit log is enough. If it stays, Devin writes the connector.
+3. Pilot app #4 as a **code app** written by Devin. Measure time to ship and check that DLP, Entra and audit still apply. That number decides how apps 5–13 get built.
+4. Devin sets up ALM: solutions exported to Git, tests and pipelines, so Power Platform changes get code review.
 
 **If you build:**
 1. Confirm flip conditions 1–3 and name the team that owns the platform *before* writing production code.
