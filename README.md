@@ -2,7 +2,7 @@
 
 Build-vs-buy evaluation: can a ~60-engineer fintech replace Microsoft Power Apps (~$250K/yr) with internal tools built by Devin?
 
-**Short answer: keep Power Apps for now. Use Devin to build the parts Power Apps can't do (custom connectors and backends), and if anything, build *inside* Power Platform with code apps.** Reasoning in [`docs/KEY_DECISIONS.md`](docs/KEY_DECISIONS.md); the cost of building is itemised in [`docs/MOCKED.md`](docs/MOCKED.md).
+**Short answer: build on Devin, keep Microsoft identity.** Engineering is needed under Power Apps anyway (refunds and flags need custom code, and the platform needs an admin), Devin makes the build and each new app cheap, and code gives tests, review and no customisation ceiling. The cost is owning the platform, so it needs a named owner before production code. Reasoning in [`docs/RECOMMENDATION.md`](docs/RECOMMENDATION.md); decisions in [`docs/KEY_DECISIONS.md`](docs/KEY_DECISIONS.md); the cost of building is itemised in [`docs/MOCKED.md`](docs/MOCKED.md).
 
 ## What's here
 
@@ -14,6 +14,7 @@ Build-vs-buy evaluation: can a ~60-engineer fintech replace Microsoft Power Apps
 | [`docs/research/audit-and-data-access.md`](docs/research/audit-and-data-access.md) | The PII/data-access policy the client owns in either option, what Microsoft covers, and where Devin helps with audit |
 | [`docs/MOCKED.md`](docs/MOCKED.md) | Everything the prototype fakes, what production needs instead, and who owns it forever |
 | [`docs/NEW_APP_PLAYBOOK.md`](docs/NEW_APP_PLAYBOOK.md) | The instructions a Devin session follows to add app #N |
+| [`docs/RECOMMENDATION.md`](docs/RECOMMENDATION.md) | Client-facing recommendation: build on Devin, costs, preconditions, migration plan |
 | [`docs/KEY_DECISIONS.md`](docs/KEY_DECISIONS.md) | One-pager: scope, architecture, tradeoffs |
 | [`prototype/`](prototype/) | The working prototype |
 
@@ -28,6 +29,7 @@ prototype/
   packages/platform   shared core: identity/RBAC, masking, audit, workflow engine, connectors, UI pieces
   packages/kyc        KYC app: schema, roles, workflow rules, tests
   packages/refunds    refunds app: schema, roles, workflow rules, Stripe service, tests
+  packages/flags      feature-flag app: per-env state, prod approvals, evaluation, tests
   apps/console        Next.js host: sign-in, nav, pages; composes the app packages
 ```
 

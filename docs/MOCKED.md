@@ -56,6 +56,7 @@ approval layer in front of that API, which also means making sure nobody can byp
 Rows 1–7 and 11–17 are a **platform** that would be built once and then run forever. Devin can write most of the
 code for it in days. Devin does not remove the need for a team to own it, carry the pager, and answer the auditor.
 At 60 engineers, that is roughly 1–2 engineers' worth of ongoing ownership plus security/compliance time, about
-$300–750K/yr at normal loaded salaries (see [RECOMMENDATION.md](RECOMMENDATION.md) §4). That is more than the $250K
-license, before counting the risk of getting a security control wrong in a fintech. Rows 8–9 (and part of 10) are
+$300–750K/yr at normal loaded salaries (see [RECOMMENDATION.md](RECOMMENDATION.md) §4). That can be more than the $250K
+license (Keep is ~$300–375K/yr once admin time is counted), before counting the risk of getting a security control wrong in a fintech.
+The recommendation accepts that cost for speed and customisation, on the condition that a named owner exists. Rows 8–9 (and part of 10) are
 custom code in either option.

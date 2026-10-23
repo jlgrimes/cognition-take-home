@@ -1,8 +1,18 @@
-# Recommendation: keep Power Apps, use Devin for the code
+# Recommendation: build on Devin, keep Microsoft identity
 
 **For:** VP of Engineering. **Status:** draft, pending answers to [open questions 2–7](research/power-apps.md#6-questions-for-the-client-before-recommending).
 
-Keep Power Apps for the KYC queue and the queue-and-approval apps that follow it. Use Devin for the code Power Apps does badly: the Stripe refund backend, the flag-service connector, and new apps written as Power Apps code apps. Building your own platform is technically easy (Devin built a working prototype of one in about two hours), but it turns a license into a team you staff permanently. The $250K/yr license costs about the same as one senior engineer. Owning the platform takes at least that one engineer, plus security time, hosting and Devin usage. Keeping Power Apps isn't fire-and-forget either: it needs part of an admin's time and engineers for the custom code (§2, §4 A6), so the real comparison is about $300–375K/yr against $300K+.
+Build the internal-tools platform in code with Devin, and move off Power Apps one app at a time. Keep Microsoft Entra as the identity provider.
+
+**Why:**
+1. **Engineering is needed either way.** Refunds and flags need custom code under Power Apps too: the Stripe connector can't issue refunds, and there's no certified LaunchDarkly connector. Power Apps also needs admin time. Keeping it costs about $300–375K/yr, not $250K (§4).
+2. **Devin makes the build and app #N cheap.** The prototype (shared platform plus three apps) took about two hours. App #3 took a separate Devin session about 5 minutes from the [playbook](NEW_APP_PLAYBOOK.md), including 14 tests.
+3. **Code is the better medium for financial logic.** It gets tests, review and Git history, and Devin is far more effective in TypeScript than in Power Fx (§2).
+4. **Customisation and growth.** Apps 4–13 aren't limited by Power Fx, delegation or connectors. The licence grows with every user; the platform doesn't.
+
+**What we're accepting:** owning the platform. That costs about $200–495K/yr if a platform owner already exists and about $300–745K/yr if not (§4). At today's headcount that overlaps with, or exceeds, Keep. We're paying for speed, customisation and control, not for a smaller bill this year. The controls around money and PII need a named owner, so building is only safe with one (§5).
+
+**Building doesn't mean leaving Microsoft's identity stack.** The console signs in through Entra (OIDC) with MFA and Conditional Access, maps Entra groups to roles, and deprovisions through SCIM [assumption: the client is on Entra, open question 4; Conditional Access needs Entra ID P1 or a bundle that includes it, verify]. What we take on is everything behind sign-in: record and field access, masking, approvals, audit storage, hosting and on-call ([MOCKED.md](MOCKED.md) rows 4–7, 10–17).
 
 Notation: **[inference]** = my read, not confirmed with you. **[assumption]** = a number I picked so the model can be calculated. Replace it with yours.
 
@@ -34,30 +44,33 @@ These are financial tools, so "who keeps it running" and "who makes sure the num
 | Platform admin / CoE | You: environments, DLP, security roles, licence assignment, Dataverse capacity, solution pipelines, cleaning up abandoned maker apps. ~0.25–0.5 FTE at 13 apps (A6) | Part of the platform team's job (rows 1–17) |
 | Integrations (Stripe, KYC vendor, flags) and reconciliation | Custom code | Custom code (same in both) |
 
-**App-level work isn't equal either.** Every option has to change business rules and screens, so §4 leaves that work out. But it costs more per change in Power Fx: there's weak testing and review, few engineers are fluent in it, and Devin is less effective there than in TypeScript. This is the best argument against plain Keep. It's an argument for Hybrid (new apps as code apps), not for replacing the platform.
+**App-level work isn't equal either.** Every option has to change business rules and screens, so §4 leaves that work out. But it costs more per change in Power Fx: there's weak testing and review, few engineers are fluent in it, and Devin is less effective there than in TypeScript. Across 13 apps that difference compounds, and it is one of the main reasons to build.
 
 **Accuracy.** Errors can come from three places, and the two options are not equally risky in each:
 1. **Money movement** (amounts, partial refunds, idempotency, retries). This is custom code in *every* option, because the Stripe connector can't issue refunds (row 8). It stays accurate through tests and a daily reconciliation against Stripe. Code handles that better than Power Fx, and Power Apps adds nothing here.
 2. **Reads and reporting** (queue counts, refund totals). Power Apps has a known way to be silently wrong: non-delegable queries cut off results on large tables. Code doesn't have that particular failure, but it has its own bugs, and tests have to catch them.
 3. **Controls** (who can approve, four-eyes, complete audit, prompt deprovisioning). Power Apps gives you primitives that are tested and attested. In-house, a bug here is a control failure. Nobody notices it until an auditor or an incident finds it. **This is where in-house software is riskiest without a dedicated owner.**
 
-So the risk of building isn't that code gets the sums wrong more often. It's that the controls around the money need a named team that owns them, and that team is the main cost in §4. If you can't name that team, don't build.
+So the risk of building isn't that code gets the sums wrong more often. It's that the controls around the money need a named team that owns them, and that team is the main cost in §4. Naming that team is precondition 1 in §5; without it, don't build.
 
 **Policy and audit evidence are the client's job in both options.** Microsoft supplies the mechanisms and attests to its own infrastructure. The client still classifies PII, designs the access matrix, turns on auditing per table, runs access reviews and produces evidence. Devin can automate much of that checking and evidence work in either option, but can't own the controls ([audit-and-data-access.md](research/audit-and-data-access.md)).
 
-## 3. The best case for building, and my answer to each point
+## 3. Why build, and the strongest objections
 
-**"Power Apps is lock-in."** True for Power Fx, flows and the Dataverse schema. *Answer:* keep the lock-in thin rather than leaving. Put business logic in Devin-written connectors, Azure Functions and code apps, which is normal code that can be moved later. The governance layer (Entra) is probably your identity provider anyway [inference; open question 4], so you'd keep using it even if you built. Lock-in gets worse with every Power Fx app you build, so it should shape *how* you build apps 4–13, not whether you keep the platform.
+**For building**
+- **Refunds and flags need custom code anyway.** The Stripe connector can't issue refunds and there's no certified LaunchDarkly connector ([research §2](research/power-apps.md#2-mapping-their-three-apps-onto-power-apps), [MOCKED.md](MOCKED.md) row 8). Under Power Apps, engineers write that code and then maintain a Power Apps layer on top of it.
+- **Power Apps isn't fire-and-forget.** Environments, DLP, roles, licences, solution pipelines, release waves and abandoned maker apps all need an owner (§2, A6).
+- **App #N is cheap and testable.** Every app is a module in one monorepo with the same workflow engine, audit and permission checks. App #3 was one Devin session from the playbook. Business-rule changes get unit tests and code review instead of Power Fx edits.
+- **No customisation ceiling.** Integration-heavy apps, custom UX and large tables don't hit Power Fx, delegation or connector limits ([research §4](research/power-apps.md#4-where-power-apps-is-weak-and-where-engineers-feel-it)).
+- **Cost doesn't scale per user.** Premium is $240/user/yr at list price, so each extra 100 app users adds ~$24K/yr. The platform's cost barely moves with headcount.
+- **No lock-in.** Logic, data and workflows are ordinary TypeScript and SQL that the company owns.
 
-**"Dataverse and delegation limits will bite."** Non-delegable Power Fx queries silently return only the first 500–2,000 rows, which gives wrong answers on big tables ([research §4](research/power-apps.md#4-where-power-apps-is-weak-and-where-engineers-feel-it)). *Answer:* this is a canvas-app / Power Fx problem. Model-driven views and code apps query on the server [my understanding; verify on one real table]. Refund analytics belongs in your warehouse or BI tool anyway. *It depends on* whether apps 4–13 are queue workflows (fine) or large-table analytics (a real problem, and a reason to use code apps or BI for those apps, not to rebuild the platform).
-
-**"Per-user pricing grows with headcount."** True: Premium is $240/user/yr at list price, and a build's cost barely changes with user count. *Answer:* this only matters if growth pushes the license well above the cost of owning a platform, which is ~$200K–$750K/yr at the §4 assumptions, against $250K/yr today. Each extra 100 Premium users adds ~$24K/yr at list price. *It depends on* how fast the number of app users grows over the next two years.
-
-**"Refunds and flags already need custom code."** Very likely true. The Stripe connector can't issue refunds and there's no certified LaunchDarkly connector ([research §2](research/power-apps.md#2-mapping-their-three-apps-onto-power-apps), [MOCKED.md](MOCKED.md) row 8). *Answer:* this is code you write in every option, and it's where Devin fits best. It doesn't remove the need for the parts around it: sign-in, roles, approvals and audit. For the flag panel specifically, the flag vendor's own UI may make a custom app unnecessary in *any* option [inference].
-
-**"We already run auth and audit for our product."** This is the strongest point. *Answer:* if it's true, the cost of rows 1, 3, 7 and 11–16 drops a lot. What's left is per-record and per-field authorisation, masking, approvals, access reviews, and putting internal tools in SOC 2 scope (rows 4–6, 10, 17). *It depends on* whether you already have: OIDC SSO on internal services, audit logs shipped to a SIEM or WORM store, a platform team with on-call, and internal services already in audit scope. If all four are true, see §5.
-
-**"Devin makes platform code cheap."** True. The prototype covers most of the logic of two apps plus a shared platform, and each row in MOCKED.md is days of Devin work, not months. *Answer:* code was never the main cost. The main cost is what comes after it: someone who understands the auth and audit code well enough to approve changes to it, carries the pager, and explains it to an auditor. Devin does reduce that work (dependency upgrades, CVE patches, tests, evidence scripts), which is why the no-platform-team case in §4 starts at 1 engineer, not 2. It doesn't get it to zero. The flag-panel run shows this on a small scale. While adding app #3, Devin found and fixed a bug in a shared form component that every app uses. App #N changes the platform under apps 1 to N−1, and someone accountable has to review those changes.
+**Objections, and how the plan handles them**
+- **"You lose Microsoft's security stack."** Partly. Identity, MFA and Conditional Access stay on Entra. What we rebuild is Dataverse roles and field security, audit history and DLP-style controls (rows 4–7, 14). Mitigation: pen test before go-live, internal tools added to SOC 2 scope, Devin-generated policy tests and evidence ([audit-and-data-access.md](research/audit-and-data-access.md)).
+- **"Owning costs more than the licence."** At today's headcount it can. The cheapest realistic build is ~$300–495K/yr against ~$300–375K for Keep (§4). The ranges overlap, and the gap narrows as app users grow. We accept that premium for the reasons above.
+- **"App #N changes the platform under every other app."** True. While adding app #3, Devin found and fixed a bug in a shared form component every app uses. Mitigation: the platform owner reviews every `packages/platform` change, CI runs every app's tests, and there's a clear line on what belongs in the platform versus an app.
+- **"Nobody outside engineering can edit the apps."** True. If ops or compliance staff need to change forms themselves ([open question 3](research/power-apps.md#6-questions-for-the-client-before-recommending)), those apps stay in Power Apps (§5).
+- **"Dependencies churn."** True. On its first run, Dependabot opened 5 update PRs on the prototype; one (TypeScript 7) had to be deferred, one needed a config change and a code fix (MOCKED row 16). Devin does the upgrades; an engineer reviews them.
 
 ## 4. Rough cost model (all numbers are assumptions)
 
@@ -68,7 +81,7 @@ Assumptions. Replace each with your own figure.
 - **A4** Hosting, DB, logging/SIEM: $10–30K/yr [assumption].
 - **A5** Devin: $20–50K/yr [placeholder]. Seats are cheap: a Teams full seat is $40/month, and flex seats are free and draw from shared on-demand credits ([Devin docs](https://docs.devin.ai/admin/billing/self-serve)). The real cost is usage. Enterprise plans (which add SSO and RBAC) bill usage in ACUs at contract prices, and those prices aren't public ([Devin docs](https://docs.devin.ai/desktop/accounts/usage)). Replace this with a quote based on expected session volume.
 - **A6** Power Platform admin/CoE work if you keep it: 0.25–0.5 FTE at ~13 apps [assumption]. Covers environments, DLP, roles, licences, solution pipelines and Microsoft's release-wave changes. Higher if nobody on staff knows Power Platform.
-- Excluded: app-level work (business rules, screens, connectors), because every option needs it. Devin lowers it in Build and Hybrid.
+- Excluded: app-level work (business rules, screens, connectors), because every option needs it. Devin lowers it in Build and Hybrid, and §2 explains why it is cheaper per change in code.
 
 | Annual, steady state | Build (already have a platform team) | Build (no platform team) | Keep | Hybrid |
 |---|---|---|---|---|
@@ -80,31 +93,33 @@ Assumptions. Replace each with your own figure.
 | Devin (A5) | $20–50K | $20–50K | — | $20–50K |
 | **Total** | **~$200–495K** | **~$300–745K** | **~$300–375K** | **~$320–425K** |
 
-**Put simply: is the platform worth one engineer?** $250K/yr is about one fully loaded senior engineer (A1). So the license is the price of one engineer you never have to hire, manage or cover for. The cheapest realistic build is that one engineer owning the platform with Devin doing most of the upkeep. Add the security/compliance time, hosting and Devin from the table and you get ~$300–495K/yr. That's more than Keep (~$300–375K with admin time), but the ranges overlap at the low end. That's why the flip conditions in §5 matter more than the point estimates. One owner is also a single point of failure for controls over money and PII: vacations, departures and on-call all need a second person [judgment]. Devin is the small line in every column. It makes the engineer more productive, but it can't be the accountable owner.
+**Put simply: is the platform worth one engineer?** $250K/yr is about one fully loaded senior engineer (A1). The cheapest realistic build is that one engineer owning the platform with Devin doing most of the upkeep. Add security/compliance time, hosting and Devin from the table and you get ~$300–495K/yr, at or above Keep (~$300–375K with admin time). The case for building isn't that it's cheaper today. It's that the spend goes into a platform the company controls, apps 4–13 ship faster, and cost doesn't grow per user. One owner is a single point of failure for controls over money and PII, so name a backup owner as well [judgment]. Devin is the small line in every column. It makes the engineers more productive, but it can't be the accountable owner.
 
 Year one of Build also includes the one-off production build (2–4 engineer-months of review and integration on top of Devin, ~$35–85K [assumption]) and paying the license while both systems run side by side.
 
-## 5. What would flip this to "build"
+## 5. Preconditions, and what would reverse this
 
-Build wins if **1 or 2** is true **and 3** is true. Items 4–6 each make building more attractive, but none of them is enough by itself:
-1. **You already run the platform.** All four items in the "auth and audit" answer in §3 exist and are staffed.
-2. **The license outgrows the ownership cost.** App users grow fast enough that the per-user license ends up well above the build cost in §4.
-3. **No one outside engineering edits the apps** ([open question 3](research/power-apps.md#6-questions-for-the-client-before-recommending)), so the citizen-developer value is zero.
-4. Apps 4–13 are mostly integration-heavy, not queue/approve/audit.
-5. You hit Dataverse or delegation limits on real data that code apps don't fix.
-6. You aren't an Entra/M365 company, so Power Apps means running a second identity stack.
+**Build only if all three hold:**
+1. **A named platform owner, plus a backup, before production code.** If nobody can be named, stay on Power Apps and use Devin for connectors and code apps (the Hybrid column).
+2. **Engineers are the only editors of the apps being migrated.** Apps that ops or compliance staff edit themselves stay in Power Apps.
+3. **Identity stays on Entra (or Okta) through OIDC and SCIM.** We don't build our own identity system.
+
+**These make building stronger:**
+- You already run SSO, centralised audit logs and on-call for product services (cost drops to ~$200–495K/yr, §4).
+- App users grow quickly.
+- Apps 4–13 are mostly integration-heavy rather than queue → review → approve.
+- You hit Dataverse or delegation limits on real data.
+
+**Reverse course if:**
+- the owner leaves and isn't replaced within a quarter;
+- the pen test or first audit finds control failures that can't be fixed within one cycle;
+- the migration stalls with both systems running for more than two quarters [assumption].
 
 ## 6. Next steps
 
-**If you keep Power Apps (recommended):**
-1. Devin builds the refund backend properly: Stripe SDK, restricted key in a secrets manager, idempotency, webhooks, daily reconciliation (MOCKED row 8), exposed to Power Apps as a custom connector.
-2. Decide whether the flag panel should exist at all, or whether the vendor UI plus its audit log is enough. If it stays, Devin writes the connector.
-3. Pilot app #4 as a **code app** written by Devin. Measure time to ship and check that DLP, Entra and audit still apply. That number decides how apps 5–13 get built.
-4. Devin sets up ALM: solutions exported to Git, tests and pipelines, so Power Platform changes get code review.
-
-**If you build:**
-1. Confirm flip conditions 1–3 and name the team that owns the platform *before* writing production code.
-2. Make MOCKED rows 1–3, 7 and 11–16 production-grade first, then pen-test and add them to SOC 2 scope. Devin writes the code; your engineers review every auth, audit and payment change.
-3. Migrate the lowest-risk app first (the flag panel: no PII, engineers are the users), with Power Apps still running alongside. Do KYC last.
-4. Devin builds each further app from the [playbook](NEW_APP_PLAYBOOK.md) and handles ongoing upgrades, CVE patches and test coverage. Humans own the pager and the auditor.
-5. Turn off Power Apps only after one audit cycle passes on the new platform.
+1. Name the platform owner and backup. Confirm open questions 2–4 (who maintains the apps today, who edits them, which identity provider).
+2. Make the platform production-grade first: Entra sign-in, groups and SCIM (MOCKED rows 1–3), audit shipped to WORM storage or a SIEM (row 7), hosting, database, secrets and on-call (rows 11–15), and the real Stripe adapter with webhooks and daily reconciliation (row 8). Devin writes the code; engineers review every auth, audit and payment change.
+3. Pen-test it and add it to SOC 2 scope.
+4. Migrate one app at a time with Power Apps still running: flags first (no PII, engineers are the users), then refunds, then KYC last. For flags, check whether the vendor's own UI already covers it.
+5. Build apps 4–13 from the [playbook](NEW_APP_PLAYBOOK.md). Devin handles dependency upgrades, CVE patches, tests and evidence scripts; humans own the pager and the auditor.
+6. Turn off Power Apps after one clean audit cycle on the new platform, except for any apps non-engineers must keep editing.

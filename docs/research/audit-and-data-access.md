@@ -60,4 +60,4 @@ that configuration is the client's job.
 
 The policy and evidence work is similar for both options, so it doesn't favour building. Building adds implementing,
 hosting and on-call for every control (MOCKED.md rows 1–7, 11–17). Devin cuts the evidence and checking work in both,
-which makes it a good fit for the Keep/Hybrid path as well as for Build.
+which matters most for Build, where the client produces the evidence for every control itself.

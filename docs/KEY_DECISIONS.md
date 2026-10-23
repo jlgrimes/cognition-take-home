@@ -1,49 +1,40 @@
-# Key decisions
+# Cognition Take-Home Key decisions
 
-> DRAFT for Jared to rewrite in his own voice. Devin wrote the code; this page is about how I directed it and why.
+## What I tested
 
-## The question I tested
-"Can Devin build three internal apps?" is obviously yes, so it's not a useful test. The real question is whether the client
-can stop paying for a **platform**. For a fintech, Power Apps' value isn't the screens. It's that every app gets Entra
-sign-in, roles, field-level security, audit history, DLP and Microsoft's patching. I went in leaning "don't build", and
-set the prototype up as a fair test of that view rather than a showcase.
+The most critical aspect in this decision is not whether Devin can do a quicker job at developing frontends and backends than Power Automate - this I would say is definitely true - it’s how much engineering effort it would take to maintain the platform. Power Apps already includes security, authentication, DLP, audit history for free. Microsoft has an incredibly rich ecosystem for identity, and losing that means we would need to build it ourselves. I wanted to be incredibly realistic about the cost of maintaining the platform, so I modularized the software to a maintainable breadth that an engineering group could easily pick up.
 
 ## Decisions I made
-- **Make the platform the subject, not the apps.** Auth and security are the main reason a company buys Microsoft here,
-  so the prototype builds the shared layer first: RBAC, PII masking with audited reveal, an append-only audit log, and
-  approvals (four-eyes, maker-checker). KYC, refunds and flags are tenants of it.
-- **Document every mock.** Each fake (sign-in, user directory, Stripe, KYC vendor, hosting, secrets, DLP…) is tagged
-  `// MOCK:` in code and listed in `docs/MOCKED.md` with its production replacement and owner. That ledger is the most
-  important output: it's the bill the client would take on. Not every row counts against building: Stripe and the KYC
-  vendor are custom code either way.
-- **Monorepo with explicit modules.** `packages/platform`, one `packages/<app>` per tool, and a Next.js host in
-  `apps/console`. Devin first suggested deferring this; I asked for it because shared pieces should be visible as
-  packages. It also makes the point plain: `packages/platform` is an internal Power Platform someone has to staff.
-- **Judge on maintenance and accuracy, not build cost.** These are financial tools, and Power Apps isn't maintenance-free
-  either (admin, ALM, Microsoft's release waves). So the comparison is ownership against ownership.
-- **Fast iteration:** direct commits to `main`, and a separate Devin session to red-team the argument doc.
 
-## Devin's proposals I accepted
-- **Next.js + SQLite, no external services**, so anyone can run it with `npm install && npm run dev`.
-- **Rules in a server-side workflow engine, not the UI.** Guards return a readable reason, so the UI shows *why* an action
-  is blocked, and tests cover the rules without a browser.
-- **Audit enforced in the database** (triggers block UPDATE/DELETE). It still isn't independent of operators; production
-  would ship it to WORM storage or a SIEM.
-- **Money calls outside DB transactions, with an idempotency key per refund request**, so a retry can't refund twice.
-- **Build app #3 from a playbook in a separate session and time it.** This measures the marginal cost of app #N, the number
-  the "10 more apps" plan depends on.
+**Platform is the subject, not the apps**. Authentication and the entire security layer is why you would go with Microsoft at all. So, the prototype builds the shared layer first - RBAC, PII masking with audited reveal, an append-only audit log, and approvals. KYC, refunds, and flags are consumers of these shared platform modules.
 
-## Tradeoffs
-- **One deployable, many modules:** one auth integration, audit pipeline and patch cycle instead of thirteen, but a shared
-  blast radius. PII and money share a process and DB here; in production KYC and refunds would get separate hosts and DBs.
-- **Mocked platform:** keeps the prototype to ~2 hours, but means it proves app logic is cheap, not that production
-  hardening is.
-- **Skipped:** visual app builder, notifications, file storage, deployment. They add to the bill without changing direction.
+**Monorepo with explicitly defined modules**. Devin originally suggested deferring this, but I asked for it because the platform needs to be able to be maintained as individual packages to ensure a scalable app ecosystem. It also directly maps the cost of switching over from Power Automate - instead of needing work done on Microsoft’s platform, engineering simply needs to manage the `packages/platform` folder.
 
-## What the build told me
-- **Code is cheap; owning the controls isn't.** App #3 took a separate Devin session about 5 minutes and 14 tests. Caveats:
-  a mocked platform and a playbook written by the same team. The more telling result was that it found and fixed a bug in
-  a form component every app shares. App #N changes the platform under apps 1 to N−1, and someone accountable has to own that.
-- **The "we need engineers anyway" argument doesn't tip it.** Refunds and flags need custom code in both options, but that
-  code isn't what replaces Power Apps; the controls around it are. That's why I land on keeping Power Apps and using Devin
-  for connectors, code apps and evidence automation (`RECOMMENDATION.md`).
+**Treating build cost as near-negligible**. The cost to build a platform on Power Automate vs Devin both require the same high-level considerations. You either have an engineering team manage the cost of building a product, who comes with more technical experience, or someone (engineering or not) needing to work through Power Automate UI, updates, and that entire learning curve. Even though Power Automate is easier for non-developers, engineering is still very much needed for this project, even with Power Automate in the form of custom code, to get the required apps to function.
+
+**Implementing everything we can without an account**. The entire app is made end-to-end except the things we need to make an account for. This pretty confidently proves the PoC as working, as the account integrations can be classified as APIs that are maintained by other teams/companies, so we don’t have to worry about that as a cost for the most part. A lot of the ones that we do are ones like Stripe, which needs to be included in the Power Apps implementation anyways as customer code, so the overhead here is quite small.
+
+**Quick iteration**. Push directly to main for prototype, separate parallel Devin sessions for parallel task execution.
+
+# Devin proposals I accepted
+
+**Next.js + SQLite, no external services, builds locally**. Stubs the mock to just the local machine so I can test with Devin.
+
+**Rules in a server-side workflow engine, not the UI**. Guards return a readable reason, so the UI shows why an action is blocked. Tests cover the rules without a browser.
+
+**Audit is enforced in the database** Production would ship it to WORM storage or a SIEM.
+
+**Money calls outside DB transactions**, with an idempotency key per refund request, so a retry can't refund twice.
+
+**Build app #3 from a playbook in a separate session and time it**. This measures the marginal cost of app #N, the number the "10 more apps" plan depends on.
+
+# Tradeoffs
+**Mocked authentication/security layers**: With no accounts, we still have to configure a lot to make this app actually work, and there’s more than just this code we would have to maintain. However, like I mentioned this is comparable to the Power Apps maintenance + custom code effort.
+
+**Skipped**: visual app builder, notifications, file storage, deployment. Extra features that don’t prove PoC. Nice to haves, would be probably good to demo to the team as a what-if, but not required for a PoC.
+
+# What the build told me
+
+**Code is cheap; owning the controls isn’t**. App #3 took a separate Devin session about 5 minutes and 14 tests. The more apps we make, the potential for the complexity of the platform to go up increases. Having a sturdy vision for what’s in and out of scope for these apps is going to be essential to keep Devin’s lead over Power Automate.
+
+**The part Power Automate isn’t good at, Devin is**. The customizability being so lightweight is going to be killer for a small, rapidly growing company, and will allow for more complex workflows in a fraction of the time.
