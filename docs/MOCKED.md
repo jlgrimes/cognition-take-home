@@ -11,7 +11,7 @@ If they build, **each row becomes a system their engineers own, patch, monitor a
 |---|------|-------------------------|-----------------------|--------------------------|-----------------------------|
 | 1 | [Identity](#identity): sign-in | "Sign in as" page sets a plain, unsigned cookie with a user id. Anyone can become anyone. | OIDC against Entra ID/Okta, signed short-lived sessions, CSRF protection, logout/session revocation | Platform/security eng | Entra sign-in, built in |
 | 2 | [Identity](#identity): MFA + Conditional Access | None | Enforced at the IdP; each new app must be registered and put under the right policy (device, location, risk) | IT/security | Inherited by every app automatically |
-| 3 | [Identity](#identity): user directory + roles | Seven hard-coded users; roles in a SQLite table | Roles mapped from IdP groups (claims or SCIM), joiner/mover/leaver automation, deprovisioning within SLA | IT + platform eng | Entra groups → Dataverse security roles/teams |
+| 3 | [Identity](#identity): user directory + roles | Nine hard-coded users; roles in a SQLite table | Roles mapped from IdP groups (claims or SCIM), joiner/mover/leaver automation, deprovisioning within SLA | IT + platform eng | Entra groups → Dataverse security roles/teams |
 | 4 | Access reviews | None | Quarterly review of who holds `kyc_senior`, `finance_manager`, `admin`, with evidence for auditors | Security/compliance | Entra access reviews (P2), Dataverse role reports |
 | 5 | Authorization | Role → permission table, checked server-side per action; no row-level rules | Per-record and per-field rules (e.g. region, team, ownership), tested on every endpoint, reviewed on every change | Every app team | Dataverse security roles, business units, field-level security |
 | 6 | PII masking | Masks four KYC fields before render; reveal is permission-gated and audited | Same, plus encryption at rest with managed keys, masking in exports/logs/backups, data-retention and deletion jobs | App teams + security | Dataverse column security, masking rules, CMK option |
@@ -26,6 +26,7 @@ If they build, **each row becomes a system their engineers own, patch, monitor a
 | 15 | Observability + on-call | None | Logs, metrics, uptime alerts, an on-call rotation for tools ops/compliance depend on | Platform eng | Microsoft SLA; admin analytics |
 | 16 | Patching | Pinned npm dependencies | Dependabot/Renovate, framework upgrades (Next.js majors), CVE response across 13 apps | Every app team | Microsoft patches the runtime |
 | 17 | Compliance scope | None | Each app documented in SOC 2/PCI scope: change management, pen tests, evidence collection | Compliance + eng | Inherits Microsoft's attestations; client still scopes its own config |
+| 18 | [Feature flags](#feature-flags) | Flag state (per-env on/off, rollout %, targeted merchants) in local SQLite tables; nothing reads it | LaunchDarkly/Unleash API or an internal flag service as the source of truth, with server/client SDKs that cache values and stream updates, consistent percentage bucketing, stale-flag cleanup | Platform eng (or vendor) | Not given: no certified LaunchDarkly connector, so this is a custom connector either way |
 
 ## Identity
 Rows 1–4. **Signing in is the cheap part.** Wiring OIDC against Entra is a day of work, and Devin can do it.
@@ -42,6 +43,13 @@ drop the triggers. Production needs the log shipped somewhere the app's own oper
 Row 8. This is the one place where building is not extra work compared to Power Apps: Microsoft's Stripe
 connector can't create refunds, so the client almost certainly already has custom backend code here.
 The prototype's `PaymentsConnector` interface is the seam a real Stripe adapter would plug into.
+
+## Feature flags
+Row 18. The flags app (`prototype/src/apps/flags/`) owns only the *governance* part: who may change what, the prod
+change-request workflow (maker-checker, rollback) and the audit trail. The flag values themselves live in SQLite, which no
+service reads. In production the store is LaunchDarkly/Unleash (via their REST API) or an internal flag service, and every
+service evaluates flags through that vendor's SDK with local caching and streaming updates. The app would become a thin
+approval layer in front of that API, which also means making sure nobody can bypass it by editing flags in the vendor UI.
 
 ## What this means for the decision
 Rows 1–7 and 11–17 are a **platform** that would be built once and then run forever. Devin can write most of the

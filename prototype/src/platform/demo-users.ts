@@ -7,5 +7,7 @@ export const DEMO_USERS = [
   { id: "u_dev", name: "Dev Patel", email: "dev@fintech.example", title: "Support Agent", roles: ["support_agent"] },
   { id: "u_eli", name: "Eli Moreau", email: "eli@fintech.example", title: "Support Agent", roles: ["support_agent"] },
   { id: "u_fay", name: "Fay Chen", email: "fay@fintech.example", title: "Finance Manager", roles: ["finance_manager"] },
-  { id: "u_gus", name: "Gus Admin", email: "gus@fintech.example", title: "Platform Admin", roles: ["admin"] },
+  { id: "u_gus", name: "Gus Admin", email: "gus@fintech.example", title: "Platform Admin", roles: ["admin", "flag_approver"] },
+  { id: "u_hana", name: "Hana Sato", email: "hana@fintech.example", title: "Software Engineer", roles: ["engineer"] },
+  { id: "u_ivan", name: "Ivan Kowalski", email: "ivan@fintech.example", title: "Staff Engineer", roles: ["engineer", "flag_approver"] },
 ];
