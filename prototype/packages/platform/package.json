@@ -13,6 +13,6 @@
     "better-sqlite3": "^12.11.1"
   },
   "peerDependencies": {
-    "react": "^19"
+    "react": "^19.3.1"
   }
 }
