@@ -14,10 +14,10 @@
     "@internal/kyc": "*",
     "@internal/platform": "*",
     "@internal/refunds": "*",
-    "better-sqlite3": "^12.11.1",
+    "better-sqlite3": "^13.0.3",
     "next": "15.5.28",
-    "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

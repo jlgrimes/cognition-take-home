@@ -8,13 +8,18 @@ import { refundLimitCents } from "@internal/refunds/workflow";
 import { StatusBadge } from "@internal/platform/ui/StatusBadge";
 import { money, when } from "@internal/platform/format";
 
+function startOfDayDaysAgo(days: number): Date {
+  const d = new Date(Date.now() - days * 86400000);
+  d.setUTCHours(0, 0, 0, 0);
+  return d;
+}
+
 export default async function RefundsDashboard() {
   const user = await requireUser();
   if (!can(user, "refunds.view")) notFound();
   const db = getDb();
   const days = 14;
-  const since = new Date(Date.now() - days * 86400000);
-  since.setUTCHours(0, 0, 0, 0);
+  const since = startOfDayDaysAgo(days);
   const refunds = await getPayments().listRefunds(since.toISOString());
   const byDay = new Map<string, number>();
   for (let i = 0; i <= days; i++) byDay.set(new Date(since.getTime() + i * 86400000).toISOString().slice(0, 10), 0);
