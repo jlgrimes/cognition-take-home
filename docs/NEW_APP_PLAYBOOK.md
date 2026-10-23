@@ -29,6 +29,16 @@ mostly business rules plus screens, and reuses the platform for identity, RBAC, 
 6. Tests in `packages/<id>/src/<id>.test.ts` using `createTestEnv([yourModule])` from `@internal/platform/testing`: one test per guard/permission rule, plus one asserting the audit entry.
 7. Tag any new fake with `// MOCK: ... See docs/MOCKED.md#<anchor>` and add a row to `docs/MOCKED.md`.
 
+## Patterns and gotchas (from building app #3)
+- **Approve, then apply something else.** A transition only updates its own record. If approving must also change another
+  table (e.g. a flag change request updating the flag), wrap the approve transition and the follow-up write in one outer
+  `db.transaction`, as `packages/flags/src/service.ts` and `packages/refunds/src/service.ts` do, and have the UI call the service, not
+  `applyTransition` directly.
+- **Guards can't query the database.** They only see the record and the user. Rules like "one open request per flag" go in
+  the service function, before `applyTransition`.
+- **Unit tests don't cover the UI.** They call workflows directly, so a broken form still passes. Click every action in
+  `npm run dev` before calling it done.
+
 ## Done when
 `cd prototype && npm install && npm run typecheck && npm run lint && npm test && npm run build` all pass, and the app works in `npm run dev`
 for the right demo users and returns 404 for the wrong ones.

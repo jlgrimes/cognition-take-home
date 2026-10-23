@@ -54,5 +54,7 @@ approval layer in front of that API, which also means making sure nobody can byp
 ## What this means for the decision
 Rows 1–7 and 11–17 are a **platform** that would be built once and then run forever. Devin can write most of the
 code for it in days. Devin does not remove the need for a team to own it, carry the pager, and answer the auditor.
-At 60 engineers, that is roughly 1–2 engineers' worth of ongoing ownership, which is in the same range as the
-$250K license, before counting the risk of getting a security control wrong in a fintech.
+At 60 engineers, that is roughly 1–2 engineers' worth of ongoing ownership plus security/compliance time, about
+$300–750K/yr at normal loaded salaries (see [RECOMMENDATION.md](RECOMMENDATION.md) §4). That is more than the $250K
+license, before counting the risk of getting a security control wrong in a fintech. Rows 8–9 (and part of 10) are
+custom code in either option.

@@ -40,7 +40,7 @@ prototype/
 **Apps** (`packages/<app>`), each exports an `AppModule` registered with one line in `apps/console/src/apps.ts`:
 - **KYC review queue**: claim (no double-claims), approve/reject/request info, escalate; high-risk cases must be escalated and the senior approver can't be the escalator.
 - **Refunds dashboard**: search charges, refund with reason codes, per-role limits ($100 support / $5,000 finance), larger refunds need a different approver, 14-day volume chart.
-- **Feature flags**: built by a separate Devin session from the playbook, as a test of how cheap app #N is.
+- **Feature flags** (`packages/flags`): per-environment state, rollout %, targeted merchants; dev/staging changes are instant, prod changes need a second person's approval, with one-click rollback. Built by a separate Devin session from the playbook in about 5 minutes, as a test of how cheap app #N is.
 
 ## Run it
 
@@ -62,7 +62,9 @@ Pick a persona on the sign-in page:
 | Cara Lindqvist | KYC analyst + senior | Reveal PII (audited); approve a case someone else escalated |
 | Dev Patel | Support agent | Refund $50 (instant); refund $400 (goes to approval) |
 | Fay Chen | Finance manager | Approve Dev's refund; try approving your own (blocked) |
-| Gus Admin | Admin | Global audit log at `/audit` |
+| Gus Admin | Admin + flag approver | Global audit log at `/audit`; approve or reject Hana's prod flag change |
+| Hana Sato | Engineer | Change a flag in staging (instant); propose a prod change or rollback (needs approval) |
+| Ivan Kowalski | Engineer + flag approver | Approve Hana's prod change; try approving your own (blocked) |
 
 Checks (same as CI):
 
