@@ -41,7 +41,7 @@ prototype/
 **Apps** (`packages/<app>`), each exports an `AppModule` registered with one line in `apps/console/src/apps.ts`:
 - **KYC review queue**: claim (no double-claims), approve/reject/request info, escalate; high-risk cases must be escalated and the senior approver can't be the escalator.
 - **Refunds dashboard**: search charges, refund with reason codes, per-role limits ($100 support / $5,000 finance), larger refunds need a different approver, 14-day volume chart.
-- **Feature flags** (`packages/flags`): per-environment state, rollout %, targeted merchants; dev/staging changes are instant, prod changes need a second person's approval, with one-click rollback. Built by a separate Devin session from the playbook in about 5 minutes, as a test of how cheap app #N is.
+- **Feature flags** (`packages/flags`): per-environment state, rollout %, targeted merchants; dev/staging changes are instant, prod changes need a second person's approval, with one-click rollback. Built by a separate Devin session from the playbook in about 5 minutes, as a test of how cheap app #N is. Product services read flags through `GET /api/flags/evaluate?env=prod&merchant=acct_1F9xQ2` (targeting, then a stable rollout bucket).
 
 ## Run it
 
@@ -75,4 +75,4 @@ npm run typecheck && npm run lint && npm test && npm run build
 
 ## What it is not
 
-Not production-secure. The sign-in is a plain cookie, the user directory is hard-coded, Stripe is a SQLite table. That gap is the point of the exercise and is listed row by row in [`docs/MOCKED.md`](docs/MOCKED.md).
+Not production-secure. The sign-in lets anyone pick any persona (the session cookie is signed, but nothing checks who you are), the user directory is hard-coded, Stripe is a SQLite table. That gap is the point of the exercise and is listed row by row in [`docs/MOCKED.md`](docs/MOCKED.md).
