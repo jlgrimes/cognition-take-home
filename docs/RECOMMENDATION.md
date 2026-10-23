@@ -75,7 +75,7 @@ Assumptions. Replace each with your own figure.
 | Devin (A5) | $20–50K | $20–50K | — | $20–50K |
 | **Total** | **~$200–495K** | **~$300–745K** | **~$270–310K** | **~$290–360K** |
 
-**Put simply: is the platform worth one engineer?** $250K/yr is about one fully loaded senior engineer (A1). So the license is the price of one engineer you never have to hire, manage or cover for. The cheapest realistic build is that one engineer owning the platform with Devin doing most of the upkeep. Add the security/compliance time, hosting and Devin from the table and you get ~$325–470K/yr, more than the license. One owner is also a single point of failure for controls over money and PII: vacations, departures and on-call all need a second person [judgment]. Devin is the small line in every column. It makes the engineer more productive, but it can't be the accountable owner.
+**Put simply: is the platform worth one engineer?** $250K/yr is about one fully loaded senior engineer (A1). So the license is the price of one engineer you never have to hire, manage or cover for. The cheapest realistic build is that one engineer owning the platform with Devin doing most of the upkeep. Add the security/compliance time, hosting and Devin from the table and you get ~$300–495K/yr, more than the license. One owner is also a single point of failure for controls over money and PII: vacations, departures and on-call all need a second person [judgment]. Devin is the small line in every column. It makes the engineer more productive, but it can't be the accountable owner.
 
 Year one of Build also includes the one-off production build (2–4 engineer-months of review and integration on top of Devin, ~$35–85K [assumption]) and paying the license while both systems run side by side.
 
