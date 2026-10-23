@@ -10,8 +10,9 @@
     "db:reset": "rm -f data/app.db data/app.db-*"
   },
   "dependencies": {
-    "@internal/platform": "*",
+    "@internal/flags": "*",
     "@internal/kyc": "*",
+    "@internal/platform": "*",
     "@internal/refunds": "*",
     "better-sqlite3": "^12.11.1",
     "next": "15.5.28",

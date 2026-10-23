@@ -6,6 +6,7 @@ const TONES: Record<string, string> = {
   escalated: "bg-orange-100 text-orange-800",
   approved: "bg-emerald-100 text-emerald-800",
   succeeded: "bg-emerald-100 text-emerald-800",
+  applied: "bg-emerald-100 text-emerald-800",
   rejected: "bg-rose-100 text-rose-800",
   failed: "bg-rose-100 text-rose-800",
 };
