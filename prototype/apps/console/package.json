@@ -20,7 +20,7 @@
     "react-dom": "19.3.1"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
+    "@tailwindcss/postcss": "^4.3.4",
     "tailwindcss": "^4"
   }
 }
